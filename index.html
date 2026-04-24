@@ -241,7 +241,7 @@
   <div class="header-icon">🧪</div>
   <div>
     <div class="header-title">원료 바코드 스캐너</div>
-    <div class="header-sub">원료바코드 → Google Sheets 자동 저장</div>
+    <div class="header-sub" id="headerSub">시트 로딩중...</div>
   </div>
   <div class="header-status">
     <div class="status-dot" id="statusDot"></div>
@@ -293,6 +293,10 @@
 
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbysefkNet3OSKJ8wDuTJGPpZikpZKI-uRynxTRVUFN7-8gcYqYlih6pjkxIyTwomFpslQ/exec";
+
+// URL에서 sheet 이름 읽기 (?sheet=A제품 형태)
+const urlParams = new URLSearchParams(window.location.search);
+const SHEET_NAME = urlParams.get('sheet') || '시트1';
 
 let logs = [];
 let lastCode = '';
@@ -359,6 +363,9 @@ function renderLogs() {
   }).join('');
 }
 
+// 헤더에 현재 시트 이름 표시
+document.getElementById('headerSub').textContent = '저장 시트: ' + SHEET_NAME;
+
 function saveToSheets(barcode) {
   const id = addLog(barcode, 'saving');
   setStatus('saving', '저장중...');
@@ -366,7 +373,7 @@ function saveToSheets(barcode) {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ barcode })
+    body: JSON.stringify({ barcode, sheet: SHEET_NAME })
   })
   .then(() => {
     updateLog(id, 'ok');
